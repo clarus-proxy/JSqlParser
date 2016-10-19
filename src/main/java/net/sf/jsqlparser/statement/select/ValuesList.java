@@ -40,6 +40,7 @@ public class ValuesList implements FromItem {
 	private MultiExpressionList multiExpressionList;
 	private boolean noBrackets = false;
 	private List<String> columnNames;
+	private boolean only = false;
 
 	public ValuesList() {
 	}
@@ -91,6 +92,8 @@ public class ValuesList implements FromItem {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
+	        if (only) 
+	            b.append("ONLY ");
 
 		b.append("(VALUES ");
 		for (Iterator<ExpressionList> it = getMultiExpressionList().getExprList().iterator(); it.hasNext();) {
@@ -124,4 +127,15 @@ public class ValuesList implements FromItem {
 	public void setColumnNames(List<String> columnNames) {
 		this.columnNames = columnNames;
 	}
+
+        @Override
+        public boolean isOnly() {
+            return only;
+        }
+
+        @Override
+        public void setOnly(boolean only) {
+            this.only = only;
+        }
+
 }

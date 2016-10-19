@@ -42,7 +42,7 @@ public class Insert implements Statement {
     private Table table;
     private List<Column> columns;
     private ItemsList itemsList;
-    private boolean useValues = true;
+    private boolean useValues = false;
     private Select select;
     private boolean useSelectBrackets = true;
     private boolean useDuplicate = false;

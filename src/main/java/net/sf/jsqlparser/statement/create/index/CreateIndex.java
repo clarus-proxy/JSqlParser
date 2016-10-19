@@ -36,6 +36,7 @@ public class CreateIndex implements Statement {
 
 	private Table table;
 	private Index index;
+        private String method;
 
 	@Override
 	public void accept(StatementVisitor statementVisitor) {
@@ -64,6 +65,17 @@ public class CreateIndex implements Statement {
 		this.table = table;
 	}
 
+        /**
+         * The name of the index method to be used
+         */
+        public String getMethod() {
+                return method;
+        }
+
+        public void setMethod(String method) {
+                this.method = method;
+        }
+
 	@Override
 	public String toString() {
 		StringBuilder buffer = new StringBuilder();
@@ -79,6 +91,10 @@ public class CreateIndex implements Statement {
 		buffer.append(index.getName());
 		buffer.append(" ON ");
 		buffer.append(table.getFullyQualifiedName());
+
+		if (method != null) {
+                    buffer.append(" USING ").append(method);
+		}
 
 		if (index.getColumnsNames() != null) {
 			buffer.append(" (");

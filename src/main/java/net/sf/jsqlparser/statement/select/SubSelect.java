@@ -38,6 +38,7 @@ public class SubSelect implements FromItem, Expression, ItemsList {
     private Alias alias;
     private boolean useBrackets = true;
     private List<WithItem> withItemsList;
+    private boolean only = false;
 
     private Pivot pivot;
 
@@ -96,6 +97,16 @@ public class SubSelect implements FromItem, Expression, ItemsList {
     }
 
     @Override
+    public boolean isOnly() {
+        return only;
+    }
+
+    @Override
+    public void setOnly(boolean only) {
+        this.only = only;
+    }
+
+    @Override
     public void accept(ItemsListVisitor itemsListVisitor) {
         itemsListVisitor.visit(this);
     }
@@ -103,6 +114,8 @@ public class SubSelect implements FromItem, Expression, ItemsList {
     @Override
     public String toString() {
         StringBuilder retval = new StringBuilder();
+        if (only) 
+            retval.append("ONLY ");
         if (useBrackets)
             retval.append("(");
         if (withItemsList != null && !withItemsList.isEmpty()) {

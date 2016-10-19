@@ -2,7 +2,7 @@
  * #%L
  * JSQLParser library
  * %%
- * Copyright (C) 2004 - 2013 JSQLParser
+ * Copyright (C) 2004 - 2015 JSQLParser
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as 
@@ -19,27 +19,31 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package net.sf.jsqlparser.statement.select;
+package net.sf.jsqlparser.util.deparser;
 
-import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.statement.ShowStatement;
 
-/**
- * An item in a "SELECT [...] FROM item1" statement. (for example a table or a
- * sub-select)
- */
-public interface FromItem {
+public class ShowStatementDeParser {
 
-	void accept(FromItemVisitor fromItemVisitor);
+	private StringBuilder buffer;
 
-	Alias getAlias();
+	/**
+	 * StringBuilder (buffer parameter) as this object in order to work
+	 * @param buffer the buffer that will be filled with the select
+	 */
+	public ShowStatementDeParser(StringBuilder buffer) {
+		this.buffer = buffer;
+	}
 
-	void setAlias(Alias alias);
+	public StringBuilder getBuffer() {
+		return buffer;
+	}
 
-    Pivot getPivot();
+	public void setBuffer(StringBuilder buffer) {
+		this.buffer = buffer;
+	}
 
-    void setPivot(Pivot pivot);
-
-    boolean isOnly();
-    
-    void setOnly(boolean only);
+	public void deParse(ShowStatement show) {
+		buffer.append("SET ").append(show.getName());
+	}
 }

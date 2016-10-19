@@ -29,6 +29,7 @@ import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.*;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.WithItem;
 import net.sf.jsqlparser.expression.operators.relational.JsonOperator;
 import java.util.Iterator;
 
@@ -75,6 +76,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     }
 
     @Override
+    public void visit(Assignment assignement) {
+        visitBinaryExpression(assignement, " = ");
+    }
+
+    @Override
     public void visit(Addition addition) {
         visitBinaryExpression(addition, " + ");
     }
@@ -82,6 +88,14 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     @Override
     public void visit(AndExpression andExpression) {
         visitBinaryExpression(andExpression, " AND ");
+    }
+
+    @Override
+    public void visit(ArrayElement arrayElement) {
+        arrayElement.getLeftExpression().accept(this);
+        buffer.append('[');
+        arrayElement.getIndex().accept(this);
+        buffer.append(']');
     }
 
     @Override
@@ -101,6 +115,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     @Override
     public void visit(EqualsTo equalsTo) {
         visitOldOracleJoinBinaryExpression(equalsTo, " = ");
+    }
+
+    @Override
+    public void visit(IsExpression is) {
+        visitOldOracleJoinBinaryExpression(is, " IS ");
     }
 
     @Override
@@ -197,6 +216,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     }
 
     @Override
+    public void visit(FromExpression fromExpression) {
+        visitBinaryExpression(fromExpression, " FROM ");
+    }
+
+    @Override
     public void visit(ExistsExpression existsExpression) {
         if (existsExpression.isNot()) {
             buffer.append("NOT EXISTS ");
@@ -227,6 +251,12 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     @Override
     public void visit(Multiplication multiplication) {
         visitBinaryExpression(multiplication, " * ");
+
+    }
+
+    @Override
+    public void visit(Not not) {
+        not.getExpression().accept(this);
 
     }
 
@@ -267,6 +297,12 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     }
 
     @Override
+    public void visit(RawStringValue rawStringValue) {
+        buffer.append(rawStringValue.getValue());
+
+    }
+
+    @Override
     public void visit(Subtraction subtraction) {
         visitBinaryExpression(subtraction, " - ");
 
@@ -284,11 +320,26 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
     @Override
     public void visit(SubSelect subSelect) {
-        buffer.append("(");
+        if (subSelect.isUseBrackets()) {
+            buffer.append("(");
+        }
+        if (subSelect.getWithItemsList() != null && !subSelect.getWithItemsList().isEmpty()) {
+            buffer.append("WITH ");
+            for (Iterator<WithItem> iter = subSelect.getWithItemsList().iterator(); iter.hasNext();) {
+                WithItem withItem = iter.next();
+                buffer.append(withItem);
+                if (iter.hasNext()) {
+                    buffer.append(",");
+                }
+                buffer.append(" ");
+            }
+        }
         if (selectVisitor != null) {
             subSelect.getSelectBody().accept(selectVisitor);
         }
-        buffer.append(")");
+        if (subSelect.isUseBrackets()) {
+            buffer.append(")");
+        }
     }
 
     @Override

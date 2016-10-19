@@ -19,27 +19,18 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package net.sf.jsqlparser.statement.select;
+package net.sf.jsqlparser.expression.operators.relational;
 
-import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.ExpressionVisitor;
 
-/**
- * An item in a "SELECT [...] FROM item1" statement. (for example a table or a
- * sub-select)
- */
-public interface FromItem {
+public class IsExpression extends ComparisonOperator {
 
-	void accept(FromItemVisitor fromItemVisitor);
+	public IsExpression() {
+		super("IS");
+	}
 
-	Alias getAlias();
-
-	void setAlias(Alias alias);
-
-    Pivot getPivot();
-
-    void setPivot(Pivot pivot);
-
-    boolean isOnly();
-    
-    void setOnly(boolean only);
+	@Override
+	public void accept(ExpressionVisitor expressionVisitor) {
+		expressionVisitor.visit(this);
+	}
 }

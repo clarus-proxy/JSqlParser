@@ -19,27 +19,25 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package net.sf.jsqlparser.statement.select;
+package net.sf.jsqlparser.expression;
 
-import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.ExpressionVisitor;
 
-/**
- * An item in a "SELECT [...] FROM item1" statement. (for example a table or a
- * sub-select)
- */
-public interface FromItem {
+public class Assignment extends BinaryExpression {
 
-	void accept(FromItemVisitor fromItemVisitor);
+        public Assignment(Expression left, Expression right) {
+            setLeftExpression(left);
+            setRightExpression(right);
+        }
 
-	Alias getAlias();
+        @Override
+	public void accept(ExpressionVisitor expressionVisitor) {
+		expressionVisitor.visit(this);
+	}
 
-	void setAlias(Alias alias);
-
-    Pivot getPivot();
-
-    void setPivot(Pivot pivot);
-
-    boolean isOnly();
-    
-    void setOnly(boolean only);
+	@Override
+	public String getStringExpression() {
+		return "=";
+	}
 }

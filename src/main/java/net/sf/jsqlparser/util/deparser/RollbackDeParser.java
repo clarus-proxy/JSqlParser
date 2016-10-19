@@ -21,23 +21,18 @@
  */
 package net.sf.jsqlparser.util.deparser;
 
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.statement.SetStatement;
+import net.sf.jsqlparser.statement.rollback.Rollback;
 
-public class SetStatementDeParser {
+public class RollbackDeParser {
 
 	private StringBuilder buffer;
-	private ExpressionVisitor expressionVisitor;
 
 	/**
-	 * @param expressionVisitor a {@link ExpressionVisitor} to de-parse
-	 * expressions. It has to share the same<br>
 	 * StringBuilder (buffer parameter) as this object in order to work
 	 * @param buffer the buffer that will be filled with the select
 	 */
-	public SetStatementDeParser(ExpressionVisitor expressionVisitor, StringBuilder buffer) {
+	public RollbackDeParser(StringBuilder buffer) {
 		this.buffer = buffer;
-		this.expressionVisitor = expressionVisitor;
 	}
 
 	public StringBuilder getBuffer() {
@@ -48,17 +43,10 @@ public class SetStatementDeParser {
 		this.buffer = buffer;
 	}
 
-	public void deParse(SetStatement set) {
-		buffer.append("SET ").append(set.getName());
-		buffer.append(" = ");
-        set.getExpression().accept(expressionVisitor);
-	}
-
-	public ExpressionVisitor getExpressionVisitor() {
-		return expressionVisitor;
-	}
-
-	public void setExpressionVisitor(ExpressionVisitor visitor) {
-		expressionVisitor = visitor;
+	public void deParse(Rollback startTransaction) {
+		buffer.append("ROLLBACK");
+        if (startTransaction.getKeyword() != null) {
+            buffer.append(' ').append(startTransaction.getKeyword());
+        }
 	}
 }

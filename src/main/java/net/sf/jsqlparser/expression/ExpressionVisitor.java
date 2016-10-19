@@ -32,12 +32,15 @@ import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
 import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.relational.ArrayElement;
 import net.sf.jsqlparser.expression.operators.relational.Between;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
+import net.sf.jsqlparser.expression.operators.relational.FromExpression;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.Matches;
@@ -78,7 +81,11 @@ public interface ExpressionVisitor {
 
 	void visit(StringValue stringValue);
 
-	void visit(Addition addition);
+        void visit(RawStringValue rawStringValue);
+
+        void visit(Assignment assignement);
+
+        void visit(Addition addition);
 
 	void visit(Division division);
 
@@ -90,11 +97,15 @@ public interface ExpressionVisitor {
 
 	void visit(OrExpression orExpression);
 
+	void visit(ArrayElement arrayElement);
+
 	void visit(Between between);
 
 	void visit(EqualsTo equalsTo);
 
-	void visit(GreaterThan greaterThan);
+        void visit(IsExpression is);
+
+        void visit(GreaterThan greaterThan);
 
 	void visit(GreaterThanEquals greaterThanEquals);
 
@@ -104,9 +115,13 @@ public interface ExpressionVisitor {
 
 	void visit(LikeExpression likeExpression);
 
-	void visit(MinorThan minorThan);
+        void visit(FromExpression fromExpression);
+
+        void visit(MinorThan minorThan);
 
 	void visit(MinorThanEquals minorThanEquals);
+
+        void visit(Not not);
 
 	void visit(NotEqualsTo notEqualsTo);
 

@@ -19,27 +19,37 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package net.sf.jsqlparser.statement.select;
-
-import net.sf.jsqlparser.expression.Alias;
+package net.sf.jsqlparser.expression;
 
 /**
- * An item in a "SELECT [...] FROM item1" statement. (for example a table or a
- * sub-select)
+ * It represents an expression like "(" expression ")"
  */
-public interface FromItem {
+public class Not implements Expression {
 
-	void accept(FromItemVisitor fromItemVisitor);
+	private Expression expression;
 
-	Alias getAlias();
+	public Not() {
+	}
 
-	void setAlias(Alias alias);
+	public Not(Expression expression) {
+		setExpression(expression);
+	}
 
-    Pivot getPivot();
+	public Expression getExpression() {
+		return expression;
+	}
 
-    void setPivot(Pivot pivot);
+	public final void setExpression(Expression expression) {
+		this.expression = expression;
+	}
 
-    boolean isOnly();
-    
-    void setOnly(boolean only);
+	@Override
+	public void accept(ExpressionVisitor expressionVisitor) {
+		expressionVisitor.visit(this);
+	}
+
+	@Override
+	public String toString() {
+		return "NOT " + expression;
+	}
 }

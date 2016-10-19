@@ -36,6 +36,7 @@ public class Table extends ASTNodeAccessImpl implements FromItem, MultiPartName 
 
     private Alias alias;
     private Pivot pivot;
+    private boolean only = false;
 
     public Table() {
     }
@@ -90,6 +91,16 @@ public class Table extends ASTNodeAccessImpl implements FromItem, MultiPartName 
     }
 
     @Override
+    public boolean isOnly() {
+        return only;
+    }
+
+    @Override
+    public void setOnly(boolean only) {
+        this.only = only;
+    }
+
+    @Override
     public String getFullyQualifiedName() {
         String fqn = "";
 
@@ -135,7 +146,7 @@ public class Table extends ASTNodeAccessImpl implements FromItem, MultiPartName 
 
     @Override
     public String toString() {
-        return getFullyQualifiedName()
+        return (only ? "ONLY " : "") + getFullyQualifiedName()
                + ((pivot != null) ? " " + pivot : "")
                + ((alias != null) ? alias.toString() : "");
     }

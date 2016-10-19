@@ -21,23 +21,18 @@
  */
 package net.sf.jsqlparser.util.deparser;
 
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.statement.SetStatement;
+import net.sf.jsqlparser.statement.start.StartTransaction;
 
-public class SetStatementDeParser {
+public class StartTransactionDeParser {
 
 	private StringBuilder buffer;
-	private ExpressionVisitor expressionVisitor;
 
 	/**
-	 * @param expressionVisitor a {@link ExpressionVisitor} to de-parse
-	 * expressions. It has to share the same<br>
 	 * StringBuilder (buffer parameter) as this object in order to work
 	 * @param buffer the buffer that will be filled with the select
 	 */
-	public SetStatementDeParser(ExpressionVisitor expressionVisitor, StringBuilder buffer) {
+	public StartTransactionDeParser(StringBuilder buffer) {
 		this.buffer = buffer;
-		this.expressionVisitor = expressionVisitor;
 	}
 
 	public StringBuilder getBuffer() {
@@ -48,17 +43,21 @@ public class SetStatementDeParser {
 		this.buffer = buffer;
 	}
 
-	public void deParse(SetStatement set) {
-		buffer.append("SET ").append(set.getName());
-		buffer.append(" = ");
-        set.getExpression().accept(expressionVisitor);
-	}
-
-	public ExpressionVisitor getExpressionVisitor() {
-		return expressionVisitor;
-	}
-
-	public void setExpressionVisitor(ExpressionVisitor visitor) {
-		expressionVisitor = visitor;
+	public void deParse(StartTransaction startTransaction) {
+		buffer.append(startTransaction.getCommand());
+        if (startTransaction.getKeyword() != null) {
+            buffer.append(' ').append(startTransaction.getKeyword());
+        }
+		if (startTransaction.getTransactionModes() != null) {
+		    boolean first = true;
+		    for (String transactionMode : startTransaction.getTransactionModes()) {
+                if (first) {
+                    first = false;
+                } else if (startTransaction.hasCommas()) {
+	                buffer.append(',');
+	            }
+                buffer.append(' ').append(transactionMode);
+		    }
+		}
 	}
 }

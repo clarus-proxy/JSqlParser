@@ -38,17 +38,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.jsqlparser.statement.SetStatement;
+import net.sf.jsqlparser.statement.ShowStatement;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.StatementVisitor;
 import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.alter.Alter;
+import net.sf.jsqlparser.statement.commit.Commit;
 import net.sf.jsqlparser.statement.create.index.CreateIndex;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.view.AlterView;
 import net.sf.jsqlparser.statement.create.view.CreateView;
+import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.execute.Execute;
+import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.merge.Merge;
+import net.sf.jsqlparser.statement.replace.Replace;
+import net.sf.jsqlparser.statement.rollback.Rollback;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
+import net.sf.jsqlparser.statement.select.FromItemVisitor;
+import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.LateralSubSelect;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectItemVisitor;
+import net.sf.jsqlparser.statement.select.SelectVisitor;
+import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.SubJoin;
+import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.TableFunction;
+import net.sf.jsqlparser.statement.select.ValuesList;
+import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.start.StartTransaction;
 import net.sf.jsqlparser.statement.truncate.Truncate;
 import net.sf.jsqlparser.expression.operators.relational.JsonOperator;
 /**
@@ -150,6 +175,11 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
     }
 
     @Override
+    public void visit(Assignment assignement) {
+        visitBinaryExpression(assignement);
+    }
+
+    @Override
     public void visit(Addition addition) {
         visitBinaryExpression(addition);
     }
@@ -157,6 +187,12 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
     @Override
     public void visit(AndExpression andExpression) {
         visitBinaryExpression(andExpression);
+    }
+
+    @Override
+    public void visit(ArrayElement arrayElement) {
+        arrayElement.getLeftExpression().accept(this);
+        arrayElement.getIndex().accept(this);
     }
 
     @Override
@@ -182,6 +218,11 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
     @Override
     public void visit(EqualsTo equalsTo) {
         visitBinaryExpression(equalsTo);
+    }
+
+    @Override
+    public void visit(IsExpression is) {
+        visitBinaryExpression(is);
     }
 
     @Override
@@ -231,6 +272,11 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
     }
 
     @Override
+    public void visit(FromExpression fromExpression) {
+        visitBinaryExpression(fromExpression);
+    }
+
+    @Override
     public void visit(ExistsExpression existsExpression) {
         existsExpression.getRightExpression().accept(this);
     }
@@ -255,6 +301,11 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
     }
 
     @Override
+    public void visit(Not not) {
+        not.getExpression().accept(this);
+    }
+
+    @Override
     public void visit(NotEqualsTo notEqualsTo) {
         visitBinaryExpression(notEqualsTo);
     }
@@ -275,6 +326,10 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
 
     @Override
     public void visit(StringValue stringValue) {
+    }
+
+    @Override
+    public void visit(RawStringValue stringValue) {
     }
 
     @Override
@@ -588,6 +643,26 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
 
     @Override
     public void visit(SetStatement set) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED_YET);
+    }
+
+    @Override
+    public void visit(ShowStatement show) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED_YET);
+    }
+
+    @Override
+    public void visit(StartTransaction startTransaction) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED_YET);
+    }
+
+    @Override
+    public void visit(Commit commit) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED_YET);
+    }
+
+    @Override
+    public void visit(Rollback Rollback) {
         throw new UnsupportedOperationException(NOT_SUPPORTED_YET);
     }
 

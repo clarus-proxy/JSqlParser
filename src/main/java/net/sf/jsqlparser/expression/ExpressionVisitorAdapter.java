@@ -119,6 +119,16 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     }
 
     @Override
+    public void visit(RawStringValue value) {
+
+    }
+
+    @Override
+    public void visit(Assignment expr) {
+        visitBinaryExpression(expr);
+    }
+
+    @Override
     public void visit(Addition expr) {
         visitBinaryExpression(expr);
     }
@@ -149,6 +159,12 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     }
 
     @Override
+    public void visit(ArrayElement expr) {
+        expr.getLeftExpression().accept(this);
+        expr.getIndex().accept(this);
+    }
+
+    @Override
     public void visit(Between expr) {
         expr.getLeftExpression().accept(this);
         expr.getBetweenExpressionStart().accept(this);
@@ -158,6 +174,11 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     @Override
     public void visit(EqualsTo expr) {
         visitBinaryExpression(expr);
+    }
+
+    @Override
+    public void visit(IsExpression is) {
+        visitBinaryExpression(is);
     }
 
     @Override
@@ -191,6 +212,11 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     }
 
     @Override
+    public void visit(FromExpression expr) {
+        visitBinaryExpression(expr);
+    }
+
+    @Override
     public void visit(MinorThan expr) {
         visitBinaryExpression(expr);
     }
@@ -198,6 +224,11 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     @Override
     public void visit(MinorThanEquals expr) {
         visitBinaryExpression(expr);
+    }
+
+    @Override
+    public void visit(Not expr) {
+        expr.getExpression().accept(this);
     }
 
     @Override

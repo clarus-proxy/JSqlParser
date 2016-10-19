@@ -23,10 +23,11 @@ package net.sf.jsqlparser.util.deparser;
 
 import java.util.Iterator;
 import net.sf.jsqlparser.statement.SetStatement;
-
+import net.sf.jsqlparser.statement.ShowStatement;
 import net.sf.jsqlparser.statement.StatementVisitor;
 import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.alter.Alter;
+import net.sf.jsqlparser.statement.commit.Commit;
 import net.sf.jsqlparser.statement.create.index.CreateIndex;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.view.AlterView;
@@ -37,8 +38,10 @@ import net.sf.jsqlparser.statement.execute.Execute;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.merge.Merge;
 import net.sf.jsqlparser.statement.replace.Replace;
+import net.sf.jsqlparser.statement.rollback.Rollback;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.start.StartTransaction;
 import net.sf.jsqlparser.statement.truncate.Truncate;
 import net.sf.jsqlparser.statement.update.Update;
 
@@ -182,6 +185,30 @@ public class StatementDeParser implements StatementVisitor {
         SetStatementDeParser setStatementDeparser = new SetStatementDeParser(expressionDeParser, buffer);
         selectDeParser.setExpressionVisitor(expressionDeParser);
         setStatementDeparser.deParse(set);
+    }
+
+    @Override
+    public void visit(ShowStatement show) {
+        ShowStatementDeParser showStatementDeparser = new ShowStatementDeParser(buffer);
+        showStatementDeparser.deParse(show);
+    }
+
+    @Override
+    public void visit(StartTransaction startTransaction) {
+        StartTransactionDeParser startTransactionDeparser = new StartTransactionDeParser(buffer);
+        startTransactionDeparser.deParse(startTransaction);
+    }
+
+    @Override
+    public void visit(Commit commit) {
+        CommitDeParser commitDeparser = new CommitDeParser(buffer);
+        commitDeparser.deParse(commit);
+    }
+
+    @Override
+    public void visit(Rollback rollback) {
+        RollbackDeParser rollbackDeparser = new RollbackDeParser(buffer);
+        rollbackDeparser.deParse(rollback);
     }
 
     @Override

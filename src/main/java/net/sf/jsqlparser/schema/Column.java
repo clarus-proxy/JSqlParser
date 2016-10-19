@@ -31,17 +31,27 @@ public final class Column extends ASTNodeAccessImpl implements Expression, Multi
 
     private Table table;
     private String columnName;
+    private Long index;
 
     public Column() {
     }
 
-    public Column(Table table, String columnName) {
+    public Column(Table table, String columnName, Long index) {
         setTable(table);
         setColumnName(columnName);
+        setIndex(index);
+    }
+
+    public Column(Table table, String columnName) {
+        this(table, columnName, null);
     }
 
     public Column(String columnName) {
-        this(null, columnName);
+        this(null, columnName, null);
+    }
+
+    public Column(String columnName, Long index) {
+        this(null, columnName, index);
     }
 
     public Table getTable() {
@@ -58,6 +68,14 @@ public final class Column extends ASTNodeAccessImpl implements Expression, Multi
 
     public void setColumnName(String string) {
         columnName = string;
+    }
+
+    public Long getIndex() {
+        return index;
+    }
+
+    public void setIndex(Long index) {
+        this.index = index;
     }
 
     @Override
@@ -85,6 +103,9 @@ public final class Column extends ASTNodeAccessImpl implements Expression, Multi
         }
         if (columnName != null) {
             fqn.append(columnName);
+        }
+        if (index != null) {
+            fqn.append('[').append(index).append(']');
         }
         return fqn.toString();
     }
