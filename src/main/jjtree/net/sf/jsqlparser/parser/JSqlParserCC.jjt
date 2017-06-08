@@ -62,16 +62,20 @@ import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.*;
 import net.sf.jsqlparser.statement.*;
 import net.sf.jsqlparser.statement.alter.*;
+import net.sf.jsqlparser.statement.close.*;
 import net.sf.jsqlparser.statement.commit.*;
 import net.sf.jsqlparser.statement.create.index.*;
 import net.sf.jsqlparser.statement.create.table.*;
 import net.sf.jsqlparser.statement.create.view.*;
+import net.sf.jsqlparser.statement.declare.cursor.*;
 import net.sf.jsqlparser.statement.delete.*;
 import net.sf.jsqlparser.statement.drop.*;
 import net.sf.jsqlparser.statement.insert.*;
 import net.sf.jsqlparser.statement.replace.*;
 import net.sf.jsqlparser.statement.rollback.*;
 import net.sf.jsqlparser.statement.execute.*;
+import net.sf.jsqlparser.statement.fetch.*;
+import net.sf.jsqlparser.statement.move.*;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.start.*;
 import net.sf.jsqlparser.statement.truncate.*;
@@ -275,6 +279,17 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_GIN : "GIN">
 |   <K_BRIN : "BRIN">
 |   <K_SHOW : "SHOW">
+|   <K_DECLARE : "DECLARE">
+|   <K_INSENSITIVE : "INSENSITIVE">
+|   <K_SCROLL : "SCROLL">
+|   <K_CURSOR : "CURSOR">
+|   <K_HOLD : "HOLD">
+|   <K_ABSOLUTE : "ABSOLUTE">
+|   <K_RELATIVE : "RELATIVE">
+|   <K_FORWARD : "FORWARD">
+|   <K_BACKWARD : "BACKWARD">
+|   <K_MOVE : "MOVE">
+|   <K_CLOSE : "CLOSE">
 }
 
 TOKEN : /* Stuff */
@@ -394,6 +409,15 @@ Statement SingleStatement() :
         stm = Rollback()
         |
         stm = Show()
+        |
+        LOOKAHEAD(1)
+        stm = DeclareCursor()
+        |
+        LOOKAHEAD(1)
+        stm = CursorOperation()
+        |
+        LOOKAHEAD(1)
+        stm = CursorClose()
 		)
     } catch (ParseException e) {
 		if (errorRecovery) {
@@ -561,6 +585,71 @@ Rollback Rollback(): {
     <K_ROLLBACK> [ (tkKeyword = <K_WORK>) | (tkKeyword = <K_TRANSACTION>) ]
     {
         return new Rollback(tkKeyword != null ? tkKeyword.image : null);
+    }
+}
+
+DeclareCursor DeclareCursor(): {
+    String name;
+    Token tkBinary = null;
+    Token tkInsensitive = null;
+    Token tkNoScroll = null;
+    Token tkScroll = null;
+    Token tkWithout = null;
+    Token tkHold = null;
+    Select query;
+}
+{
+    <K_DECLARE> name = RelObjectNameExt() [(tkBinary = <K_BINARY>)] [(tkInsensitive = <K_INSENSITIVE>)] [ [(tkNoScroll = <K_NO>)] (tkScroll = <K_SCROLL>)]
+    <K_CURSOR> [( (<K_WITH>) | tkWithout = <K_WITHOUT> ) (tkHold = <K_HOLD>)]
+    <K_FOR> query = Select()
+    {
+        boolean binary = tkBinary != null;
+        boolean insensitive = tkInsensitive != null;
+        Boolean scroll = tkScroll == null ? null : tkNoScroll != null ? Boolean.FALSE : Boolean.TRUE;
+        Boolean hold = tkHold == null ? null : tkWithout != null ? Boolean.FALSE : Boolean.TRUE;
+        return new DeclareCursor(name, binary, insensitive, scroll, hold, query);
+    }
+}
+
+CursorOperation CursorOperation(): {
+    Token tkOperation = null;
+    String name;
+    Token tkDirection1 = null;
+    Token tkDirection2 = null;
+    Token tkCount = null;
+    Token tkFromIn = null;
+}
+{
+    ((tkOperation = <K_FETCH>) | (tkOperation = <K_MOVE>))
+    [ LOOKAHEAD(2)
+     (  (tkDirection1 = <K_NEXT>) | (tkDirection1 = <K_PRIOR>) | (tkDirection1 = <K_FIRST>) | (tkDirection1 = <K_LAST>)
+      | (tkDirection1 = <K_ABSOLUTE> tkCount = <S_LONG>) | (tkDirection1 = <K_RELATIVE> tkCount = <S_LONG>)
+      | (tkCount = <S_LONG>) | (tkDirection2 = <K_ALL>) | (tkDirection1 = <K_FORWARD> [(tkCount = <S_LONG>) | (tkDirection2 = <K_ALL>)])
+      | (tkDirection1 = <K_BACKWARD> [(tkCount = <S_LONG>) | (tkDirection2 = <K_ALL>)])
+     ) [(tkFromIn = <K_FROM>) | (tkFromIn = <K_IN>)]
+    ] name = RelObjectNameExt()
+    {
+        String direction = tkDirection1 != null ? tkDirection1.image : null;
+        if (tkDirection2 != null) {
+            direction = direction != null ? direction + " " + tkDirection2.image : tkDirection2.image;
+        }
+        Long count = tkCount != null ? Long.valueOf(tkCount.image) : null;
+        String fromIn = tkFromIn != null ? tkFromIn.image : null;
+        if (tkOperation.kind == K_FETCH) {
+            return new CursorFetch(name, direction, count, fromIn);
+        } else {
+            return new CursorMove(name, direction, count, fromIn);
+        }
+    }
+}
+
+CursorClose CursorClose(): {
+    String name = null;
+}
+{
+    <K_CLOSE> (<K_ALL> | name = RelObjectNameExt())
+    {
+        return new CursorClose(name);
     }
 }
 
@@ -1189,7 +1278,7 @@ SelectExpressionItem SelectExpressionItem():
 	Alias alias = null;
 }
 {
-	 expression=SelectItemExpression() 
+	expression=SelectItemExpression()
 	{ selectExpressionItem = new SelectExpressionItem(); selectExpressionItem.setExpression(expression); }
 			 [LOOKAHEAD(Alias()) alias=Alias() { selectExpressionItem.setAlias(alias); }]
 			 { return selectExpressionItem; }
@@ -1906,6 +1995,7 @@ Expression OrExpression():
 Expression AndExpression() :
 {
 	Expression left, right, result;
+    Token token;
 	boolean not = false;
 }
 {
@@ -1919,8 +2009,7 @@ Expression AndExpression() :
 	{ result = left; }
 
 	(
-		LOOKAHEAD(<K_AND>)
- 		<K_AND>
+		LOOKAHEAD(<K_AND> | "&&") (token = <K_AND> | token = "&&")
 		(
 		LOOKAHEAD(Condition())
 		    right=Condition()
@@ -1929,7 +2018,7 @@ Expression AndExpression() :
 		    "(" right=OrExpression() ")" {right = new Parenthesis(right); if (not) { ((Parenthesis)right).setNot(); not = false; } }
 		)
 		{
-			result = new AndExpression(left, right);
+			result = new AndExpression(left, right, token.image);
 			left = result;
 		}
 	)*

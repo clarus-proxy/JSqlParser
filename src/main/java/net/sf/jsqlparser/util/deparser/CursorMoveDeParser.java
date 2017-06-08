@@ -2,7 +2,7 @@
  * #%L
  * JSQLParser library
  * %%
- * Copyright (C) 2004 - 2013 JSQLParser
+ * Copyright (C) 2004 - 2015 JSQLParser
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as 
@@ -19,29 +19,22 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package net.sf.jsqlparser.expression.operators.conditional;
+package net.sf.jsqlparser.util.deparser;
 
-import net.sf.jsqlparser.expression.BinaryExpression;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
+import net.sf.jsqlparser.statement.move.CursorMove;
 
-public class OrExpression extends BinaryExpression {
+public class CursorMoveDeParser extends CursorOperationDeParser {
 
-        public OrExpression() {
-        }
-
-	public OrExpression(Expression leftExpression, Expression rightExpression) {
-		setLeftExpression(leftExpression);
-		setRightExpression(rightExpression);
+	/**
+	 * StringBuilder (buffer parameter) as this object in order to work
+	 * @param buffer the buffer that will be filled with the select
+	 */
+	public CursorMoveDeParser(StringBuilder buffer) {
+		super(buffer);
 	}
 
-	@Override
-	public void accept(ExpressionVisitor expressionVisitor) {
-		expressionVisitor.visit(this);
-	}
-
-	@Override
-	public String getStringExpression() {
-		return "OR";
-	}
+    public void deParse(CursorMove cursorMove) {
+        buffer.append("MOVE ");
+        super.deParse(cursorMove);
+    }
 }

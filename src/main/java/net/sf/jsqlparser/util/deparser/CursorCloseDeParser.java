@@ -2,7 +2,7 @@
  * #%L
  * JSQLParser library
  * %%
- * Copyright (C) 2004 - 2013 JSQLParser
+ * Copyright (C) 2004 - 2015 JSQLParser
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as 
@@ -19,29 +19,36 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package net.sf.jsqlparser.expression.operators.conditional;
+package net.sf.jsqlparser.util.deparser;
 
-import net.sf.jsqlparser.expression.BinaryExpression;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
+import net.sf.jsqlparser.statement.close.CursorClose;
 
-public class OrExpression extends BinaryExpression {
+public class CursorCloseDeParser {
 
-        public OrExpression() {
-        }
+	private StringBuilder buffer;
 
-	public OrExpression(Expression leftExpression, Expression rightExpression) {
-		setLeftExpression(leftExpression);
-		setRightExpression(rightExpression);
+	/**
+	 * StringBuilder (buffer parameter) as this object in order to work
+	 * @param buffer the buffer that will be filled with the select
+	 */
+	public CursorCloseDeParser(StringBuilder buffer) {
+		this.buffer = buffer;
 	}
 
-	@Override
-	public void accept(ExpressionVisitor expressionVisitor) {
-		expressionVisitor.visit(this);
+	public StringBuilder getBuffer() {
+		return buffer;
 	}
 
-	@Override
-	public String getStringExpression() {
-		return "OR";
+	public void setBuffer(StringBuilder buffer) {
+		this.buffer = buffer;
+	}
+
+	public void deParse(CursorClose cursorClose) {
+		buffer.append("CLOSE ");
+		if (cursorClose.isAll()) {
+	        buffer.append("ALL");
+		} else {
+            buffer.append(cursorClose.getName());
+		}
 	}
 }
