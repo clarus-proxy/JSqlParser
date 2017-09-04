@@ -533,7 +533,7 @@ public class SelectTest extends TestCase {
         final Skip skip = selectBody.getSkip();
         assertNotNull(skip.getJdbcParameter());
         assertNotNull(skip.getJdbcParameter().getIndex());
-        assertEquals((int) 1, (int) skip.getJdbcParameter().getIndex());
+        assertEquals(1, (int) skip.getJdbcParameter().getIndex());
         assertNull(skip.getVariable());
         final First first = selectBody.getFirst();
         assertNull(first.getJdbcParameter());
@@ -596,7 +596,7 @@ public class SelectTest extends TestCase {
                 + "SELECT * FROM mytable2 LIMIT 3, 4";
         assertStatementCanBeDeparsedAs(select, statementToString);
     }
-    
+
     public void testUnion2() throws JSQLParserException {
         String statement = "SELECT * FROM mytable WHERE mytable.col = 9 UNION "
                 + "SELECT * FROM mytable3 WHERE mytable3.col = ? UNION " + "SELECT * FROM mytable2 LIMIT 3 OFFSET 4";
@@ -617,7 +617,7 @@ public class SelectTest extends TestCase {
                 + "SELECT * FROM mytable2 LIMIT 3 OFFSET 4";
         assertStatementCanBeDeparsedAs(select, statementToString);
     }
-    
+
 
     public void testDistinct() throws JSQLParserException {
         String statement = "SELECT DISTINCT ON (myid) myid, mycol FROM mytable WHERE mytable.col = 9";
@@ -1419,7 +1419,7 @@ public class SelectTest extends TestCase {
         String stmt = "SELECT * FROM tabelle1, tabelle2 WHERE tabelle1.a(+) = tabelle2.b AND tabelle1.b(+) IN ('A', 'B')";
         assertSqlCanBeParsedAndDeparsed(stmt);
     }
-    
+
     public void testOracleJoinIssue318() throws JSQLParserException {
         assertSqlCanBeParsedAndDeparsed("SELECT * FROM TBL_A, TBL_B, TBL_C WHERE TBL_A.ID(+) = TBL_B.ID AND TBL_C.ROOM(+) = TBL_B.ROOM");
     }
@@ -1856,8 +1856,8 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed("SELECT SUM(CAST(sale->'items'->>'quantity' AS integer)) AS total_quantity_sold FROM sales");
         assertSqlCanBeParsedAndDeparsed("SELECT sale->>'items' FROM sales");
         assertSqlCanBeParsedAndDeparsed("SELECT json_typeof(sale->'items'), json_typeof(sale->'items'->'quantity') FROM sales");
-        
-        
+
+
         //The following staments can be parsed but not deparsed
         for (String statement : new String[]{
             "SELECT doc->'site_name' FROM websites WHERE doc @> '{\"tags\":[{\"term\":\"paris\"}, {\"term\":\"food\"}]}'",
@@ -1886,16 +1886,20 @@ public class SelectTest extends TestCase {
         assertSqlCanBeParsedAndDeparsed("SELECT pg_class.relname, pg_attribute.attname, pg_constraint.conname "
                 + "FROM pg_constraint JOIN pg_class ON pg_class.oid = pg_constraint.conrelid"
                 + " JOIN pg_attribute ON pg_attribute.attrelid = pg_constraint.conrelid"
-                + " WHERE pg_constraint.contype = 'u' AND (pg_attribute.attnum = ANY(pg_constraint.conkey))"
+                + " WHERE pg_constraint.contype = 'u' AND (pg_attribute.attnum = ANY (pg_constraint.conkey))"
                 + " ORDER BY pg_constraint.conname");
     }
 
     public void testSelectJoin2() throws JSQLParserException {
-        assertSqlCanBeParsedAndDeparsed("SELECT * FROM pg_constraint WHERE pg_attribute.attnum = ANY(pg_constraint.conkey)");
+        assertSqlCanBeParsedAndDeparsed("SELECT * FROM pg_constraint WHERE pg_attribute.attnum = ANY (pg_constraint.conkey)");
     }
 
     public void testAnyConditionSubSelect() throws JSQLParserException {
         assertSqlCanBeParsedAndDeparsed("SELECT e1.empno, e1.sal FROM emp e1 WHERE e1.sal > ANY (SELECT e2.sal FROM emp e2 WHERE e2.deptno = 10)");
+    }
+
+    public void testAnyConditionSubSelect2() throws JSQLParserException {
+        assertSqlCanBeParsedAndDeparsed("SELECT attname, CASE WHEN typname = ANY (ARRAY['geometry', 'geography', 'topogeometry']) THEN 1 ELSE NULL END AS isSpatial FROM pg_attribute JOIN pg_type ON atttypid = pg_type.oid WHERE attrelid = regclass('\"public\".\"boreholes_3857\"') AND attnum > 0");
     }
 
     public void testAllConditionSubSelect() throws JSQLParserException {
@@ -2261,19 +2265,19 @@ public class SelectTest extends TestCase {
         Statements stmts = CCJSqlParserUtil.parseStatements(sqls);
         assertEquals(2, stmts.getStatements().size());
     }
-    
+
     public void testProblemSqlIssue330() throws JSQLParserException {
         assertSqlCanBeParsedAndDeparsed("SELECT COUNT(*) FROM C_Invoice WHERE IsSOTrx='Y' AND (Processed='N' OR Updated>(current_timestamp - CAST('90 days' AS interval))) AND C_Invoice.AD_Client_ID IN(0,1010016) AND C_Invoice.AD_Org_ID IN(0,1010053,1010095,1010094)", true);
     }
-    
+
     public void testProblemSqlIssue330_2() throws JSQLParserException {
         assertSqlCanBeParsedAndDeparsed("SELECT CAST('90 days' AS interval)");
     }
-//    won't fix due to lookahead impact on parser    
+//    won't fix due to lookahead impact on parser
 //    public void testKeywordOrderAsColumnnameIssue333() throws JSQLParserException {
 //        assertSqlCanBeParsedAndDeparsed("SELECT choice.response_choice_id AS uuid, choice.digit AS digit, choice.text_response AS textResponse, choice.voice_prompt AS voicePrompt, choice.action AS action, choice.contribution AS contribution, choice.order_num AS order, choice.description AS description, choice.is_join_conference AS joinConference, choice.voice_prompt_language_code AS voicePromptLanguageCode, choice.text_response_language_code AS textResponseLanguageCode, choice.description_language_code AS descriptionLanguageCode, choice.rec_phrase AS recordingPhrase FROM response_choices choice WHERE choice.presentation_id = ? ORDER BY choice.order_num", true);
 //    }
-    
+
     public void testProblemKeywordCommitIssue341() throws JSQLParserException {
         assertSqlCanBeParsedAndDeparsed("SELECT id, commit FROM table1");
     }

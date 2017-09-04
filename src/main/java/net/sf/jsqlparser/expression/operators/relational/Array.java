@@ -19,36 +19,28 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package net.sf.jsqlparser.expression.operators.conditional;
+package net.sf.jsqlparser.expression.operators.relational;
 
-import net.sf.jsqlparser.expression.BinaryExpression;
+import java.util.List;
+
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 
-public class AndExpression extends BinaryExpression {
+public class Array implements Expression {
 
-    private String operator;
+        private List<Expression> elements;
 
-    public AndExpression() {
-        setOperator("AND");
-    }
-
-    public AndExpression(Expression leftExpression, Expression rightExpression) {
-	    this(leftExpression, rightExpression, "AND");
+	public Array(List<Expression> elements) {
+	    this.elements = elements;
 	}
 
-	public AndExpression(Expression leftExpression, Expression rightExpression, String operator) {
-		setLeftExpression(leftExpression);
-		setRightExpression(rightExpression);
-		setOperator(operator.toUpperCase());
+	public List<Expression> getElements() {
+		return elements;
 	}
 
-	public String getOperator() {
-	    return operator;
-	}
-
-	public void setOperator(String operator) {
-	    this.operator = operator;
+	public void setElements(List<Expression> elements) {
+            this.elements = elements;
 	}
 
 	@Override
@@ -57,7 +49,7 @@ public class AndExpression extends BinaryExpression {
 	}
 
 	@Override
-	public String getStringExpression() {
-		return operator;
+	public String toString() {
+		return "ARRAY" + "[" + PlainSelect.getStringList(elements, true, false) + "]";
 	}
 }

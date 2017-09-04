@@ -73,6 +73,7 @@ import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
 import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.relational.Array;
 import net.sf.jsqlparser.expression.operators.relational.ArrayElement;
 import net.sf.jsqlparser.expression.operators.relational.Between;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -256,6 +257,13 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
     public void visit(ArrayElement arrayElement) {
         arrayElement.getLeftExpression().accept(this);
         arrayElement.getIndex().accept(this);
+    }
+
+    @Override
+    public void visit(Array array) {
+        for (Expression element : array.getElements()) {
+            element.accept(this);
+        }
     }
 
     @Override
@@ -449,7 +457,9 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
 
     @Override
     public void visit(AnyComparisonExpression anyComparisonExpression) {
-        anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
+        if (anyComparisonExpression.getExpression() != null) {
+            anyComparisonExpression.getExpression().accept(this);
+        }
     }
 
     @Override

@@ -165,6 +165,13 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     }
 
     @Override
+    public void visit(Array array) {
+        for (Expression element : array.getElements()) {
+            element.accept(this);
+        }
+    }
+
+    @Override
     public void visit(Between expr) {
         expr.getLeftExpression().accept(this);
         expr.getBetweenExpressionStart().accept(this);
@@ -379,7 +386,7 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     public void visit(JsonExpression jsonExpr) {
         visit(jsonExpr.getColumn());
     }
-    
+
     @Override
     public void visit(JsonOperator expr) {
         visitBinaryExpression(expr);
@@ -485,9 +492,9 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
 
 	@Override
 	public void visit(HexValue hexValue) {
-		
+
 	}
-        
+
     @Override
     public void visit(OracleHint hint) {
 
@@ -500,7 +507,7 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
 
     @Override
     public void visit(DateTimeLiteralExpression literal) {
-    
+
     }
 
 }
