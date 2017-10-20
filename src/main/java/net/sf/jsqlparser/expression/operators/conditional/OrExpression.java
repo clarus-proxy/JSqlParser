@@ -27,6 +27,9 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 
 public class OrExpression extends BinaryExpression {
 
+        public OrExpression() {
+        }
+
 	public OrExpression(Expression leftExpression, Expression rightExpression) {
 		setLeftExpression(leftExpression);
 		setRightExpression(rightExpression);

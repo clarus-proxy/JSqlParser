@@ -39,4 +39,7 @@ public interface FromItem {
 
     void setPivot(Pivot pivot);
 
+    boolean isOnly();
+    
+    void setOnly(boolean only);
 }

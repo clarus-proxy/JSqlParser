@@ -27,10 +27,15 @@ package net.sf.jsqlparser.expression;
 public class StringValue implements Expression {
 
     private String value = "";
+    private boolean escaped = false;
 
     public StringValue(String escapedValue) {
-        // romoving "'" at the start and at the end
-        if (escapedValue.startsWith("'") && escapedValue.endsWith("'")) {
+        if (escapedValue.startsWith("E'") && escapedValue.endsWith("'")) {
+            // removing "E'" at the start and "'" at the end
+            value = escapedValue.substring(2, escapedValue.length() - 1);
+            escaped = true;
+        } else if (escapedValue.startsWith("'") && escapedValue.endsWith("'")) {
+            // removing "'" at the start and at the end
             value = escapedValue.substring(1, escapedValue.length() - 1);
         } else {
             value = escapedValue;
@@ -64,6 +69,6 @@ public class StringValue implements Expression {
 
     @Override
     public String toString() {
-        return "'" + value + "'";
+        return (escaped ? "E'" : "'") + value + "'";
     }
 }
