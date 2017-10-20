@@ -33,7 +33,9 @@ public class LimitDeparser {
 
     public void deParse(Limit limit) {
         buffer.append(" LIMIT ");
-        if (limit.isLimitNull()) {
+        if (limit.isLimitAll()) {
+            buffer.append("ALL");
+        } else if (limit.isLimitNull()) {
             buffer.append("NULL");
         } else {
             if (limit.isOffsetJdbcParameter()) {
@@ -41,7 +43,7 @@ public class LimitDeparser {
             } else if (limit.getOffset() != 0) {
                 buffer.append(limit.getOffset()).append(", ");
             }
-            
+
             if (limit.isRowCountJdbcParameter()) {
                 buffer.append("?");
             } else if (limit.getRowCount() >= 0) {

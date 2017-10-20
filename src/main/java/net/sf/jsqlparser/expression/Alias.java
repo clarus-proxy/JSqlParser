@@ -21,6 +21,8 @@
  */
 package net.sf.jsqlparser.expression;
 
+import java.util.List;
+
 /**
  *
  * @author toben
@@ -29,6 +31,7 @@ public class Alias {
 
 	private String name;
 	private boolean useAs = true;
+	private List<String> attributes;
 
 	public Alias(String name) {
 		this.name = name;
@@ -55,8 +58,32 @@ public class Alias {
 		this.useAs = useAs;
 	}
 
+	public List<String> getAttributes() {
+	    return attributes;
+	}
+
+        public void setAttributes(List<String> attributes) {
+            this.attributes = attributes;
+        }
+
 	@Override
 	public String toString() {
-		return (useAs ? " AS " : " ") + name;
+	    StringBuilder sb = new StringBuilder(" ");
+	    if (useAs)
+	        sb.append("AS ");
+	    sb.append(name);
+	    if (attributes != null) {
+	        sb.append('(');
+	        int i = 0;
+	        for (String attribute : attributes) {
+	            if (i > 0) {
+	                sb.append(", ");
+	            }
+	            sb.append(attribute);
+	            i ++;
+                }
+                sb.append(')');
+	    }
+	    return sb.toString();
 	}
 }

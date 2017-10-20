@@ -5,8 +5,8 @@
  * Copyright (C) 2004 - 2013 JSQLParser
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
@@ -14,7 +14,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
  * 
- * You should have received a copy of the GNU General Lesser Public 
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -29,6 +29,7 @@ import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.*;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.WithItem;
 import net.sf.jsqlparser.expression.operators.relational.JsonOperator;
 import java.util.Iterator;
 
@@ -75,6 +76,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     }
 
     @Override
+    public void visit(Assignment assignement) {
+        visitBinaryExpression(assignement, " = ");
+    }
+
+    @Override
     public void visit(Addition addition) {
         visitBinaryExpression(addition, " + ");
     }
@@ -82,6 +88,28 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     @Override
     public void visit(AndExpression andExpression) {
         visitBinaryExpression(andExpression, " AND ");
+    }
+
+    @Override
+    public void visit(ArrayElement arrayElement) {
+        arrayElement.getLeftExpression().accept(this);
+        buffer.append('[');
+        arrayElement.getIndex().accept(this);
+        buffer.append(']');
+    }
+
+    @Override
+    public void visit(Array array) {
+        buffer.append("ARRAY");
+        buffer.append('[');
+        for (Iterator<Expression> iter = array.getElements().iterator(); iter.hasNext();) {
+            Expression expression = iter.next();
+            expression.accept(this);
+            if (iter.hasNext()) {
+                buffer.append(", ");
+            }
+        }
+        buffer.append(']');
     }
 
     @Override
@@ -101,6 +129,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     @Override
     public void visit(EqualsTo equalsTo) {
         visitOldOracleJoinBinaryExpression(equalsTo, " = ");
+    }
+
+    @Override
+    public void visit(IsExpression is) {
+        visitOldOracleJoinBinaryExpression(is, " IS ");
     }
 
     @Override
@@ -197,6 +230,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     }
 
     @Override
+    public void visit(FromExpression fromExpression) {
+        visitBinaryExpression(fromExpression, " FROM ");
+    }
+
+    @Override
     public void visit(ExistsExpression existsExpression) {
         if (existsExpression.isNot()) {
             buffer.append("NOT EXISTS ");
@@ -227,6 +265,12 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     @Override
     public void visit(Multiplication multiplication) {
         visitBinaryExpression(multiplication, " * ");
+
+    }
+
+    @Override
+    public void visit(Not not) {
+        not.getExpression().accept(this);
 
     }
 
@@ -267,6 +311,12 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     }
 
     @Override
+    public void visit(RawStringValue rawStringValue) {
+        buffer.append(rawStringValue.getValue());
+
+    }
+
+    @Override
     public void visit(Subtraction subtraction) {
         visitBinaryExpression(subtraction, " - ");
 
@@ -284,11 +334,26 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
     @Override
     public void visit(SubSelect subSelect) {
-        buffer.append("(");
+        if (subSelect.isUseBrackets()) {
+            buffer.append("(");
+        }
+        if (subSelect.getWithItemsList() != null && !subSelect.getWithItemsList().isEmpty()) {
+            buffer.append("WITH ");
+            for (Iterator<WithItem> iter = subSelect.getWithItemsList().iterator(); iter.hasNext();) {
+                WithItem withItem = iter.next();
+                buffer.append(withItem);
+                if (iter.hasNext()) {
+                    buffer.append(",");
+                }
+                buffer.append(" ");
+            }
+        }
         if (selectVisitor != null) {
             subSelect.getSelectBody().accept(selectVisitor);
         }
-        buffer.append(")");
+        if (subSelect.isUseBrackets()) {
+            buffer.append(")");
+        }
     }
 
     @Override
@@ -428,8 +493,12 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
     @Override
     public void visit(AnyComparisonExpression anyComparisonExpression) {
-        buffer.append(anyComparisonExpression.getAnyType().name()).append(" ");
-        anyComparisonExpression.getSubSelect().accept((ExpressionVisitor) this);
+        buffer.append(anyComparisonExpression.getAnyType().name());
+        buffer.append(" (");
+        if (anyComparisonExpression.getExpression() != null) {
+            anyComparisonExpression.getExpression().accept(this);
+        }
+        buffer.append(')');
     }
 
     @Override
@@ -529,7 +598,7 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
     public void visit(JsonExpression jsonExpr) {
         buffer.append(jsonExpr.toString());
     }
-    
+
     @Override
     public void visit(JsonOperator jsonExpr) {
         visitBinaryExpression(jsonExpr, " " + jsonExpr.getStringExpression() + " ");

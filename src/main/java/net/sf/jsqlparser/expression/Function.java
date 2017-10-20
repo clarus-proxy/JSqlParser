@@ -35,6 +35,7 @@ public class Function implements Expression {
     private boolean isEscaped = false;
     private String attribute;
     private KeepExpression keep = null;
+    private Alias alias;
 
     @Override
     public void accept(ExpressionVisitor expressionVisitor) {
@@ -123,6 +124,14 @@ public class Function implements Expression {
         this.keep = keep;
     }
 
+    public Alias getAlias() {
+        return alias;
+    }
+
+    public void setAlias(Alias alias) {
+        this.alias = alias;
+    }
+
     @Override
     public String toString() {
         String params;
@@ -152,6 +161,10 @@ public class Function implements Expression {
         
         if (isEscaped) {
             ans = "{fn " + ans + "}";
+        }
+
+        if (alias != null) {
+            ans += alias.toString();
         }
 
         return ans;

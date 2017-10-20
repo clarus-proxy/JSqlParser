@@ -22,24 +22,31 @@
 package net.sf.jsqlparser.statement;
 
 import net.sf.jsqlparser.statement.alter.Alter;
+import net.sf.jsqlparser.statement.close.CursorClose;
+import net.sf.jsqlparser.statement.commit.Commit;
 import net.sf.jsqlparser.statement.create.index.CreateIndex;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.view.AlterView;
 import net.sf.jsqlparser.statement.create.view.CreateView;
+import net.sf.jsqlparser.statement.declare.cursor.DeclareCursor;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.execute.Execute;
+import net.sf.jsqlparser.statement.fetch.CursorFetch;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.merge.Merge;
+import net.sf.jsqlparser.statement.move.CursorMove;
 import net.sf.jsqlparser.statement.replace.Replace;
+import net.sf.jsqlparser.statement.rollback.Rollback;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.start.StartTransaction;
 import net.sf.jsqlparser.statement.truncate.Truncate;
 import net.sf.jsqlparser.statement.update.Update;
 
 public class StatementVisitorAdapter implements StatementVisitor {
     @Override
     public void visit(Select select) {
-        
+
     }
 
     @Override
@@ -99,20 +106,60 @@ public class StatementVisitorAdapter implements StatementVisitor {
 
     @Override
     public void visit(Execute execute) {
-        
+
     }
 
     @Override
     public void visit(SetStatement set) {
-        
+
+    }
+
+    @Override
+    public void visit(ShowStatement show) {
+
+    }
+
+    @Override
+    public void visit(StartTransaction startTransaction) {
+
+    }
+
+    @Override
+    public void visit(Commit commit) {
+
+    }
+
+    @Override
+    public void visit(Rollback Rollback) {
+
     }
 
     @Override
     public void visit(Merge merge) {
-        
+
     }
 
     @Override
     public void visit(AlterView alterView) {
+    }
+
+    @Override
+    public void visit(DeclareCursor declareCursor) {
+
+    }
+
+    @Override
+    public void visit(CursorFetch cursorFetch) {
+
+    }
+
+    @Override
+    public void visit(CursorMove cursorMove) {
+
+    }
+
+    @Override
+    public void visit(CursorClose cursorClose) {
+
     }
 }

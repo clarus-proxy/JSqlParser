@@ -45,6 +45,7 @@ public class InsertDeParser implements ItemsListVisitor {
     private StringBuilder buffer;
     private ExpressionVisitor expressionVisitor;
     private SelectVisitor selectVisitor;
+    private boolean useValues;
 
     public InsertDeParser() {
     }
@@ -97,6 +98,8 @@ public class InsertDeParser implements ItemsListVisitor {
             buffer.append(")");
         }
 
+        useValues = insert.isUseValues();
+
         if (insert.getItemsList() != null) {
             insert.getItemsList().accept(this);
         }
@@ -148,7 +151,10 @@ public class InsertDeParser implements ItemsListVisitor {
 
     @Override
     public void visit(ExpressionList expressionList) {
-        buffer.append(" VALUES (");
+        if (useValues) {
+            buffer.append(" VALUES");
+        }
+        buffer.append(" (");
         for (Iterator<Expression> iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
             Expression expression = iter.next();
             expression.accept(expressionVisitor);
@@ -161,7 +167,10 @@ public class InsertDeParser implements ItemsListVisitor {
 
     @Override
     public void visit(MultiExpressionList multiExprList) {
-        buffer.append(" VALUES ");
+        if (useValues) {
+            buffer.append(" VALUES");
+        }
+        buffer.append(" ");
         for (Iterator<ExpressionList> it = multiExprList.getExprList().iterator(); it.hasNext();) {
             buffer.append("(");
             for (Iterator<Expression> iter = it.next().getExpressions().iterator(); iter.hasNext();) {

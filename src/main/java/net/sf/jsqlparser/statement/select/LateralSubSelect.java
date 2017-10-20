@@ -33,6 +33,7 @@ public class LateralSubSelect implements FromItem {
 	private SubSelect subSelect;
 	private Alias alias;
     private Pivot pivot;
+    private boolean only = false;
 
 	public void setSubSelect(SubSelect subSelect) {
 		this.subSelect = subSelect;
@@ -67,9 +68,19 @@ public class LateralSubSelect implements FromItem {
         this.pivot = pivot;
     }
 
-    @Override
+	@Override
+	public boolean isOnly() {
+	    return only;
+	}
+
+        @Override
+        public void setOnly(boolean only) {
+            this.only = only;
+        }
+
+	@Override
 	public String toString() {
-		return "LATERAL" + subSelect.toString() +
+		return (only ? "ONLY " : "") + "LATERAL" + subSelect.toString() +
                 ((pivot != null) ? " "+pivot : "") +
                 ((alias != null) ? alias.toString() : "");
 	}

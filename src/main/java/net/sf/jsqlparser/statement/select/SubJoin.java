@@ -32,6 +32,7 @@ public class SubJoin implements FromItem {
 	private Join join;
 	private Alias alias;
 	private Pivot pivot;
+	private boolean only = false;
 
 	@Override
 	public void accept(FromItemVisitor fromItemVisitor) {
@@ -74,9 +75,19 @@ public class SubJoin implements FromItem {
 		this.alias = alias;
 	}
 
+        @Override
+        public boolean isOnly() {
+            return only;
+        }
+
+        @Override
+        public void setOnly(boolean only) {
+            this.only = only;
+        }
+
 	@Override
 	public String toString() {
-		return "(" + left + " " + join + ")"
+		return (only ? "ONLY " : "") + "(" + left + " " + join + ")"
 				+ ((pivot != null) ? " " + pivot : "")
 				+ ((alias != null) ? alias.toString() : "");
 	}

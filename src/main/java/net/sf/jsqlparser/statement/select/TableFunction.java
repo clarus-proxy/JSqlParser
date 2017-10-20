@@ -23,6 +23,8 @@ package net.sf.jsqlparser.statement.select;
 
 public class TableFunction extends FunctionItem implements FromItem {
 
+    private boolean only = false;
+
     @Override
     public void accept(FromItemVisitor fromItemVisitor) {
         fromItemVisitor.visit(this);
@@ -35,5 +37,20 @@ public class TableFunction extends FunctionItem implements FromItem {
 
     @Override
     public void setPivot(Pivot pivot) {
+    }
+
+    @Override
+    public boolean isOnly() {
+        return only;
+    }
+
+    @Override
+    public void setOnly(boolean only) {
+        this.only = only;
+    }
+
+    @Override
+    public String toString() {
+        return (only ? "ONLY " : "") + super.toString();
     }
 }
